@@ -1,0 +1,69 @@
+diff --git a/include/mruby/compile.h b/include/mruby/compile.h
+index fd735be8..15e3ca25 100644
+--- a/include/mruby/compile.h
++++ b/include/mruby/compile.h
+@@ -7,6 +7,8 @@
+ #ifndef MRUBY_COMPILE_H
+ #define MRUBY_COMPILE_H
+ 
++// #include <stdio.h>
++
+ #include "common.h"
+ 
+ /**
+diff --git a/mrbgems/default.gembox b/mrbgems/default.gembox
+index 23e65fce..9837aa32 100644
+--- a/mrbgems/default.gembox
++++ b/mrbgems/default.gembox
+@@ -3,7 +3,7 @@ MRuby::GemBox.new do |conf|
+   conf.gem :core => "mruby-metaprog"
+ 
+   # Use standard IO/File class
+-  conf.gem :core => "mruby-io"
++  # conf.gem :core => "mruby-io"
+ 
+   # Use standard Array#pack, String#unpack methods
+   conf.gem :core => "mruby-pack"
+diff --git a/mrbgems/mruby-io/src/io.c b/mrbgems/mruby-io/src/io.c
+index e5b83e92..4855d3dd 100644
+--- a/mrbgems/mruby-io/src/io.c
++++ b/mrbgems/mruby-io/src/io.c
+@@ -976,6 +976,13 @@ mrb_io_pid(mrb_state *mrb, mrb_value io)
+   return mrb_nil_value();
+ }
+ 
++// can't compile for DC without this... To be investigated later
++struct timeval {
++  time_t tv_sec;
++  suseconds_t tv_usec;
++};
++//
++
+ static struct timeval
+ time2timeval(mrb_state *mrb, mrb_value time)
+ {
+diff --git a/mrbgems/mruby-socket/mrbgem.rake b/mrbgems/mruby-socket/mrbgem.rake
+index b0894e09..959038bc 100644
+--- a/mrbgems/mruby-socket/mrbgem.rake
++++ b/mrbgems/mruby-socket/mrbgem.rake
+@@ -12,7 +12,7 @@ MRuby::Gem::Specification.new('mruby-socket') do |spec|
+     spec.linker.libraries << "ws2_32"
+   end
+ 
+-  spec.add_dependency('mruby-io', :core => 'mruby-io')
++  # spec.add_dependency('mruby-io', :core => 'mruby-io')
+   spec.add_dependency('mruby-pack', :core => 'mruby-pack')
+   # spec.add_dependency('mruby-mtest')
+ end
+diff --git a/src/gc.c b/src/gc.c
+index ec52787e..cfa58610 100644
+--- a/src/gc.c
++++ b/src/gc.c
+@@ -4,6 +4,7 @@
+ ** See Copyright Notice in mruby.h
+ */
+ 
++#include <stddef.h>
+ #include <string.h>
+ #include <stdlib.h>
+ #include <mruby.h>
