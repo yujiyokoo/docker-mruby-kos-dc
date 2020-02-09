@@ -1,0 +1,13 @@
+= docker-mruby-kos-dc
+
+This repo contains original scripts for building the docker image available at: https://hub.docker.com/r/yujiyokoo/mruby-kos-dc
+
+This is for building "mruby on dreamcast" projects.
+
+== Example:
+
+In your project dir, run:
+
+----
+docker run -i -t -v $(pwd):/mnt yujiyokoo/mruby-kos-dc bash -c 'cd /mnt && . /opt/toolchains/dc/kos/environ.sh && make clean && make'
+----
