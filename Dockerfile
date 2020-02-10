@@ -46,10 +46,14 @@ RUN . /opt/toolchains/dc/kos/environ.sh && sh /opt/toolchains/dc/kos-ports/utils
 RUN apt-get install -y libelf-dev
 
 # build dcload-serial & dcload-ip
+# FIXME: Currently there's a problem with latest dcload-ip. Using an older version for now.
+ENV KOS_BASE="/opt/toolchains/dc/kos"
 RUN cd /opt/toolchains/dc && git clone https://github.com/sizious/dcload-serial.git && cd /opt/toolchains/dc/dcload-serial && make install
-RUN cd /opt/toolchains/dc && git clone https://github.com/sizious/dcload-ip.git && cd /opt/toolchains/dc/dcload-ip && make install
+RUN cd /opt/toolchains/dc && git clone https://github.com/sizious/dcload-ip.git && cd /opt/toolchains/dc/dcload-ip && git checkout 45d586187806 && git reset --hard && make install
 
 RUN mkdir -p /usr/src
+
+RUN apt-get install -y rake
 
 RUN cd /usr/src && git clone https://github.com/mruby/mruby.git mruby-host && cd /usr/src/mruby-host # && git checkout 7c91efc
 
@@ -57,11 +61,11 @@ RUN cp -R /usr/src/mruby-host /usr/src/mruby-sh4
 
 RUN cd /usr/src/mruby-host && make
 
-COPY envset.crosscompile.sh4.sh /vagrant/src/mruby-sh4/envset.crosscompile.sh4.sh
+COPY envset.crosscompile.sh4.sh /usr/src/mruby-sh4/envset.crosscompile.sh4.sh
 
 COPY patch.on.mruby-2.0.1.37bc343e0ad6b837de672c8c0cf6bf00876f746b /tmp/patch.on.mruby-2.0.1.37bc343e0ad6b837de672c8c0cf6bf00876f746b
 
 RUN cd /usr/src/mruby-sh4 && patch -p1 < /tmp/patch.on.mruby-2.0.1.37bc343e0ad6b837de672c8c0cf6bf00876f746b
 
-RUN cd /usr/src/mruby-sh4 && . /opt/toolchains/dc/kos/environ.sh && . /vagrant/src/mruby-sh4/envset.crosscompile.sh4.sh && make 2>&1 | grep 'mrbc: Syntax error: word unexpected (expecting ")"' && cp /usr/src/mruby-host/build/host/bin/mrbc build/host/bin/mrbc && make
+RUN cd /usr/src/mruby-sh4 && . /opt/toolchains/dc/kos/environ.sh && . /usr/src/mruby-sh4/envset.crosscompile.sh4.sh && make 2>&1 | grep 'mrbc: Syntax error: ")" unexpected' && cp /usr/src/mruby-host/build/host/bin/mrbc build/host/bin/mrbc && make
 
