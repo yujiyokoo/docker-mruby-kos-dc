@@ -1,10 +1,10 @@
-FROM debian:jessie
+FROM debian:stretch
 
 RUN \
   apt-get update && \
   apt-get upgrade -y && \
   apt-get install -y \
-    build-essential git subversion libjpeg-dev libpng12-dev curl libssl-dev \
+    build-essential git subversion libjpeg-dev libpng-dev curl libssl-dev \
     ruby bison wget python texinfo libelf-dev rake
 
 # TODO: convenience. Remove later
@@ -15,9 +15,14 @@ RUN \
 
 RUN git clone git://git.code.sf.net/p/cadcdev/kallistios /opt/toolchains/dc/kos
 
+RUN cd /opt/toolchains/dc/kos/utils/dc-chain && ln -s config.mk.stable.sample config.mk
+
 RUN cd /opt/toolchains/dc/kos/utils/dc-chain && ./download.sh
 
 RUN cd /opt/toolchains/dc/kos/utils/dc-chain && ./unpack.sh
+
+# aarch64 systems has problems with config.guess from 2011. Overwriting gcc-4.7.4/config.guess with a newer version
+RUN cp /opt/toolchains/dc/kos/utils/dc-chain/config.guess /opt/toolchains/dc/kos/utils/dc-chain/gcc-4.7.4/config.guess
 
 RUN cd /opt/toolchains/dc/kos/utils/dc-chain && make
 
@@ -27,6 +32,9 @@ RUN . /opt/toolchains/dc/kos/environ.sh && cd /opt/toolchains/dc/kos && make
 
 # get and build kos-ports
 RUN git clone git://git.code.sf.net/p/cadcdev/kos-ports /opt/toolchains/dc/kos-ports
+
+# Until https://github.com/KallistiOS/kos-ports/issues/12 is resolved, temp workaround
+RUN echo "SHA256 (jpegsrc.v9d.tar.gz) = 2303a6acfb6cc533e0e86e8a9d29f7e6079e118b9de3f96e07a71a11c082fa6a\nSIZE (jpegsrc.v9d.tar.gz) = 1030917\n" > /opt/toolchains/dc/kos-ports/libjpeg/distinfo
 
 # Switching to wget. There were some issues with curl with ipv6 but may be specific to my development env.
 RUN sed -i -e 's/FETCH_CMD\s*=\s*curl/#FETCH_CMD = curl/' -e 's/#FETCH_CMD\s*=\s*wget/FETCH_CMD = wget/' /opt/toolchains/dc/kos-ports/config.mk
@@ -44,4 +52,4 @@ RUN mkdir -p /usr/src
 
 RUN cd /opt && git clone https://github.com/mruby/mruby.git mruby
 
-RUN cd /opt/mruby&& cp examples/targets/build_config_dreamcast_shelf.rb build_config.rb && make
+RUN cd /opt/mruby && cp build_config/dreamcast_shelf.rb build_config.rb && make
