@@ -33,14 +33,10 @@ RUN . /opt/toolchains/dc/kos/environ.sh && cd /opt/toolchains/dc/kos && make
 # get and build kos-ports
 RUN git clone git://git.code.sf.net/p/cadcdev/kos-ports /opt/toolchains/dc/kos-ports
 
-# FIXME: Temp workaround until https://github.com/KallistiOS/kos-ports/issues/12 is resolved
-RUN echo "SHA256 (jpegsrc.v9d.tar.gz) = 2303a6acfb6cc533e0e86e8a9d29f7e6079e118b9de3f96e07a71a11c082fa6a\nSIZE (jpegsrc.v9d.tar.gz) = 1030917\n" > /opt/toolchains/dc/kos-ports/libjpeg/distinfo
-
 # Switching to wget. There were some issues with curl with ipv6 but may be specific to my development env.
 RUN sed -i -e 's/FETCH_CMD\s*=\s*curl/#FETCH_CMD = curl/' -e 's/#FETCH_CMD\s*=\s*wget/FETCH_CMD = wget/' /opt/toolchains/dc/kos-ports/config.mk
 
 RUN . /opt/toolchains/dc/kos/environ.sh && sh /opt/toolchains/dc/kos-ports/utils/build-all.sh
-
 
 # build dcload-serial & dcload-ip
 # FIXME: Currently there's a problem with latest dcload-ip. Using an older version for now.
@@ -50,6 +46,9 @@ RUN cd /opt/toolchains/dc && git clone https://github.com/sizious/dcload-ip.git 
 
 RUN mkdir -p /usr/src
 
-RUN cd /opt && git clone --branch=3.0.0 https://github.com/mruby/mruby.git mruby
+# We can use this if we want to use a specific release
+# RUN cd /opt && git clone --branch=3.1.0 https://github.com/mruby/mruby.git mruby
+# However, we use the latest for the moment here:
+RUN cd /opt && git clone https://github.com/mruby/mruby.git mruby
 
 RUN cd /opt/mruby && make MRUBY_CONFIG=dreamcast_shelf
