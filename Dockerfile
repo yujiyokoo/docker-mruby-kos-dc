@@ -19,12 +19,9 @@ RUN cd /opt/toolchains/dc/kos/utils/dc-chain && ln -s config/config.mk.stable.sa
 
 RUN cd /opt/toolchains/dc/kos/utils/dc-chain && make all force_downloader=wget # gdb_download_type=xz
 
-# FIXME: aarch64 systems has problems with config.guess from 2011. Overwriting gcc-4.7.4/config.guess with a newer version
-# RUN cp /opt/toolchains/dc/kos/utils/dc-chain/config.guess /opt/toolchains/dc/kos/utils/dc-chain/gcc-4.7.4/config.guess
-
 RUN cp /opt/toolchains/dc/kos/doc/environ.sh.sample /opt/toolchains/dc/kos/environ.sh
 
-RUN /bin/bash -c "env && source /opt/toolchains/dc/kos/environ.sh && env && cd /opt/toolchains/dc/kos && make"
+RUN /bin/bash -c "source /opt/toolchains/dc/kos/environ.sh && cd /opt/toolchains/dc/kos && make"
 
 # get and build kos-ports
 RUN git clone git://git.code.sf.net/p/cadcdev/kos-ports /opt/toolchains/dc/kos-ports
@@ -48,5 +45,5 @@ RUN cd /opt && git clone https://github.com/mruby/mruby.git mruby
 
 RUN /bin/bash -c "source /opt/toolchains/dc/kos/environ.sh && cd /opt/mruby && make MRUBY_CONFIG=dreamcast_shelf"
 
-# TODO: move this and also remove 'env' above
+# TODO: move this
 RUN apt-get install -y genisoimage
